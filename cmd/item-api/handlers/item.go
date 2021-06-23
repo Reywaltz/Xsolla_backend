@@ -12,6 +12,7 @@ import (
 type ItemRepository interface {
 	GetAll() ([]models.Item, error)
 	Create(item models.Item) error
+	Delete(item models.Item) (*string, error)
 }
 
 type ItemHandlers struct {
@@ -24,6 +25,27 @@ func NewItemHandlers(log log.Logger, itemRepo ItemRepository) *ItemHandlers {
 		log:      log,
 		ItemRepo: itemRepo,
 	}
+}
+
+func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
+	res, err := i.ItemRepo.GetAll()
+	if err != nil {
+		i.log.Errorf("Can't get data from DB: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	data, err := json.Marshal(&res)
+	if err != nil {
+		i.log.Errorf("Can't marshall data: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+
+	return
 }
 
 func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
@@ -57,29 +79,33 @@ func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
-	res, err := i.ItemRepo.GetAll()
-	if err != nil {
-		i.log.Errorf("Can't get data from DB: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-
-	data, err := json.Marshal(&res)
-	if err != nil {
-		i.log.Errorf("Can't marshall data: %s", err)
-		w.WriteHeader(http.StatusInternalServerError)
+func (i *ItemHandlers) deleteItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sku, ok := vars["sku"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
 
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(data)
 
-	return
+	var item models.Item
+	item.SKU = &sku
+
+	res, err := i.ItemRepo.Delete(item)
+	if err != nil {
+		i.log.Errorf("Can't delete item: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	i.log.Infof("Item with SKU=%s is deleted", *res)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (i *ItemHandlers) Routes(router *mux.Router) {
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 	subRouter.HandleFunc("/items", i.createItem).Methods("POST")
 	subRouter.HandleFunc("/items", i.getItems).Methods("GET")
+	subRouter.HandleFunc("/items/{sku}", i.deleteItem)
 }

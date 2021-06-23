@@ -10,6 +10,7 @@ const (
 	GetAllquery = `SELECT ` + itemFields + ` from item`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
+	DeleteQuery = `DELETE FROM item WHERE sku=$1 RETURNING SKU`
 )
 
 type ItemRepo struct {
@@ -50,4 +51,16 @@ func (i *ItemRepo) Create(item models.Item) error {
 	}
 
 	return nil
+}
+
+func (i *ItemRepo) Delete(item models.Item) (*string, error) {
+	row := i.DB.Conn.QueryRow(DeleteQuery, item.SKU)
+
+	var sku *string
+
+	if err := row.Scan(&sku); err != nil {
+		return nil, err
+	}
+
+	return sku, nil
 }
