@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 
 	numeric "github.com/jackc/pgtype/ext/shopspring-numeric"
 )
@@ -36,6 +37,10 @@ func (i *Item) Bind(r *http.Request) error {
 
 	if i.Type == nil {
 		return errors.New("Type is required")
+	}
+
+	if len(strings.TrimSpace(*i.Name)) < 3 || len(strings.TrimSpace(*i.Type)) < 3 {
+		return errors.New("Name or type are too short")
 	}
 
 	return nil
