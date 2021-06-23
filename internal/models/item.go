@@ -18,12 +18,10 @@ type Item struct {
 func (i *Item) Bind(r *http.Request) error {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
-
 		return err
 	}
 
 	if err = json.Unmarshal(b, &i); err != nil {
-
 		return err
 	}
 
