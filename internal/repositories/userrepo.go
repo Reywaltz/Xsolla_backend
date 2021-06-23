@@ -6,8 +6,10 @@ import (
 )
 
 const (
-	itemFields  = `SKU, name, type, cost`
+	itemFields  = `sku, name, type, cost`
 	GetAllquery = `SELECT ` + itemFields + ` from item`
+	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
+	VALUES ($1, $2, $3, $4) returning sku`
 )
 
 type ItemRepo struct {
@@ -39,4 +41,13 @@ func (i *ItemRepo) GetAll() ([]models.Item, error) {
 	}
 
 	return out, nil
+}
+
+func (i *ItemRepo) Create(item models.Item) error {
+	_, err := i.DB.Conn.Exec(InsertQuery, item.SKU, item.Name, item.Type, item.Cost)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

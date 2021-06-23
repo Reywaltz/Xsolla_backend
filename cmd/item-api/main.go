@@ -33,6 +33,7 @@ func main() {
 	router.StrictSlash(true)
 
 	itemHandlers.Routes(router)
+	log.Infof("Inited router")
 
 	http.ListenAndServe(":8000", router)
 }

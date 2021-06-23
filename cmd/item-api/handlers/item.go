@@ -11,7 +11,7 @@ import (
 
 type ItemRepository interface {
 	GetAll() ([]models.Item, error)
-	// createItem(item models.Item) error
+	Create(item models.Item) error
 }
 
 type ItemHandlers struct {
@@ -36,8 +36,23 @@ func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	i.log.Infof("Incomed item: %v", item)
-	w.WriteHeader(http.StatusOK)
+	tmpName, tmpType := *item.Name, *item.Type
+	sku := tmpName[:3] + `-` + tmpType[:3]
+
+	item.SKU = &sku
+
+	if err := i.ItemRepo.Create(item); err != nil {
+		i.log.Errorf("Can't insert item: %s", err)
+		w.WriteHeader(http.StatusInternalServerError)
+
+		return
+	}
+
+	rawJSON := []byte(`{"SKU": "` + *item.SKU + `"}`)
+	i.log.Infof("Created item: %v", item)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(rawJSON)
 
 	return
 }
@@ -67,5 +82,4 @@ func (i *ItemHandlers) Routes(router *mux.Router) {
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 	subRouter.HandleFunc("/items", i.createItem).Methods("POST")
 	subRouter.HandleFunc("/items", i.getItems).Methods("GET")
-
 }
