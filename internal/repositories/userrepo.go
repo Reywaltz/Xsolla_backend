@@ -10,7 +10,7 @@ import (
 
 const (
 	itemFields  = `sku, name, type, cost`
-	GetAllquery = `SELECT ` + itemFields + ` from item`
+	GetAllquery = `SELECT ` + itemFields + ` from item limit $1`
 	GetOneQuery = `SELECT ` + itemFields + ` from item WHERE sku=$1`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
@@ -28,8 +28,8 @@ func NewItemRepository(db *postgres.DB) *ItemRepo {
 	}
 }
 
-func (i *ItemRepo) GetAll() ([]models.Item, error) {
-	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery)
+func (i *ItemRepo) GetAll(limit *string) ([]models.Item, error) {
+	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery, limit)
 	if err != nil {
 		return nil, err
 	}

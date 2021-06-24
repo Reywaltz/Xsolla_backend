@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Reywaltz/backend_xsolla/internal/models"
@@ -13,7 +14,7 @@ import (
 )
 
 type ItemRepository interface {
-	GetAll() ([]models.Item, error)
+	GetAll(limit *string) ([]models.Item, error)
 	Create(item models.Item) error
 	Delete(item models.Item) (*string, error)
 	GetOne(item models.Item) (models.Item, error)
@@ -33,7 +34,22 @@ func NewItemHandlers(log log.Logger, itemRepo ItemRepository) *ItemHandlers {
 }
 
 func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
-	res, err := i.ItemRepo.GetAll()
+	queries, ok := r.URL.Query()["limit"]
+	var limit *string
+	if !ok {
+		queries = nil
+	} else {
+		_, err := strconv.Atoi(queries[0])
+		if err != nil {
+			i.log.Errorf("Limit is not a number: %s", err)
+			w.WriteHeader(http.StatusBadRequest)
+
+			return
+		}
+		limit = &queries[0]
+	}
+
+	res, err := i.ItemRepo.GetAll(limit)
 	if err != nil {
 		i.log.Errorf("Can't get data from DB: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
