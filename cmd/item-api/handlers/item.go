@@ -17,6 +17,7 @@ type ItemRepository interface {
 	Create(item models.Item) error
 	Delete(item models.Item) (*string, error)
 	GetOne(item models.Item) (models.Item, error)
+	Update(item models.Item) error
 }
 
 type ItemHandlers struct {
@@ -48,8 +49,6 @@ func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(data)
-
-	return
 }
 
 func (i *ItemHandlers) getItem(w http.ResponseWriter, r *http.Request) {
@@ -89,8 +88,6 @@ func (i *ItemHandlers) getItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(out)
-
-	return
 }
 
 func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
@@ -120,8 +117,6 @@ func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(rawJSON)
-
-	return
 }
 
 func (i *ItemHandlers) deleteItem(w http.ResponseWriter, r *http.Request) {
@@ -155,10 +150,38 @@ func (i *ItemHandlers) deleteItem(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (i *ItemHandlers) EditItem(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sku, ok := vars["sku"]
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	var tmp models.Item
+	if err := tmp.Bind(r); err != nil {
+		i.log.Errorf("Can't bind JSON: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
+
+		return
+	}
+
+	tmp.SKU = &sku
+
+	if err := i.ItemRepo.Update(tmp); err != nil {
+		i.log.Errorf("Can't update item with sku: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (i *ItemHandlers) Routes(router *mux.Router) {
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 	subRouter.HandleFunc("/items", i.createItem).Methods("POST")
 	subRouter.HandleFunc("/items", i.getItems).Methods("GET")
 	subRouter.HandleFunc("/items/{sku}", i.deleteItem).Methods("DELETE")
 	subRouter.HandleFunc("/items/{sku}", i.getItem).Methods("GET")
+	subRouter.HandleFunc("/items/{sku}", i.EditItem).Methods("PUT")
 }

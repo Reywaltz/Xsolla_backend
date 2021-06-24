@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	"github.com/Reywaltz/backend_xsolla/pkg/postgres"
@@ -14,6 +15,7 @@ const (
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
 	DeleteQuery = `DELETE FROM item WHERE sku=$1 RETURNING SKU`
+	UpdateQuery = `UPDATE item set name=$1, type=$2, cost=$3 WHERE sku=$4`
 )
 
 type ItemRepo struct {
@@ -85,4 +87,22 @@ func (i *ItemRepo) Delete(item models.Item) (*string, error) {
 	}
 
 	return sku, nil
+}
+
+func (i *ItemRepo) Update(item models.Item) error {
+	commandTag, err := i.DB.Conn.Exec(context.Background(),
+		UpdateQuery,
+		item.Name,
+		item.Type,
+		item.Cost,
+		item.SKU)
+	if err != nil {
+		return err
+	}
+
+	if commandTag.RowsAffected() != 1 {
+		return errors.New("No item with such sku")
+	}
+
+	return nil
 }
