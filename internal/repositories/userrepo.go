@@ -11,7 +11,7 @@ import (
 
 const (
 	itemFields  = `sku, name, type, cost`
-	GetAllquery = `SELECT ` + itemFields + ` from item where type ILIKE '%' || $1 || '%' limit $2 offset $3`
+	GetAllquery = `SELECT ` + itemFields + ` from item where type ILIKE $1 || '%' limit $2 offset $3`
 	GetOneQuery = `SELECT ` + itemFields + ` from item WHERE sku=$1`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
@@ -30,7 +30,11 @@ func NewItemRepository(db *postgres.DB) *ItemRepo {
 }
 
 func (i *ItemRepo) GetAll(queries *additions.Query) ([]models.Item, error) {
-	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery, queries.Type, queries.Limit, queries.Offset)
+	rows, err := i.DB.Conn.Query(context.Background(),
+		GetAllquery,
+		queries.Type,
+		queries.Limit,
+		queries.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +47,6 @@ func (i *ItemRepo) GetAll(queries *additions.Query) ([]models.Item, error) {
 		if err := rows.Scan(&tmpItem.SKU, &tmpItem.Name, &tmpItem.Type, &tmpItem.Cost); err != nil {
 			return out, err
 		}
-
 		out = append(out, tmpItem)
 	}
 
