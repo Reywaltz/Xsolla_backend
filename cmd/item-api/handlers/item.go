@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strconv"
 	"strings"
 
+	"github.com/Reywaltz/backend_xsolla/cmd/item-api/additions"
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	log "github.com/Reywaltz/backend_xsolla/pkg/log"
 	"github.com/gorilla/mux"
@@ -14,7 +14,7 @@ import (
 )
 
 type ItemRepository interface {
-	GetAll(limit *string) ([]models.Item, error)
+	GetAll(*additions.Query) ([]models.Item, error)
 	Create(item models.Item) error
 	Delete(item models.Item) (*string, error)
 	GetOne(item models.Item) (models.Item, error)
@@ -34,25 +34,20 @@ func NewItemHandlers(log log.Logger, itemRepo ItemRepository) *ItemHandlers {
 }
 
 func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
-	queries, ok := r.URL.Query()["limit"]
-	var limit *string
-	if !ok {
-		queries = nil
-	} else {
-		_, err := strconv.Atoi(queries[0])
-		if err != nil {
-			i.log.Errorf("Limit is not a number: %s", err)
-			w.WriteHeader(http.StatusBadRequest)
+	queries, err := additions.HandleURLQueries(r)
+	if err != nil {
+		i.log.Errorf("Wrong query param: %s", err)
+		w.WriteHeader(http.StatusBadRequest)
 
-			return
-		}
-		limit = &queries[0]
+		return
 	}
 
-	res, err := i.ItemRepo.GetAll(limit)
+	res, err := i.ItemRepo.GetAll(queries)
 	if err != nil {
 		i.log.Errorf("Can't get data from DB: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
+
+		return
 	}
 
 	data, err := json.Marshal(&res)

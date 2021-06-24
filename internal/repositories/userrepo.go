@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 
+	"github.com/Reywaltz/backend_xsolla/cmd/item-api/additions"
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	"github.com/Reywaltz/backend_xsolla/pkg/postgres"
 )
 
 const (
 	itemFields  = `sku, name, type, cost`
-	GetAllquery = `SELECT ` + itemFields + ` from item limit $1`
+	GetAllquery = `SELECT ` + itemFields + ` from item limit $1 offset $2`
 	GetOneQuery = `SELECT ` + itemFields + ` from item WHERE sku=$1`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
@@ -28,8 +29,8 @@ func NewItemRepository(db *postgres.DB) *ItemRepo {
 	}
 }
 
-func (i *ItemRepo) GetAll(limit *string) ([]models.Item, error) {
-	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery, limit)
+func (i *ItemRepo) GetAll(queries *additions.Query) ([]models.Item, error) {
+	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery, queries.Limit, queries.Offset)
 	if err != nil {
 		return nil, err
 	}
