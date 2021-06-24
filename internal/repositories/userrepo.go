@@ -10,6 +10,7 @@ import (
 const (
 	itemFields  = `sku, name, type, cost`
 	GetAllquery = `SELECT ` + itemFields + ` from item`
+	GetOneQuery = `SELECT ` + itemFields + ` from item WHERE sku=$1`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
 	DeleteQuery = `DELETE FROM item WHERE sku=$1 RETURNING SKU`
@@ -44,6 +45,18 @@ func (i *ItemRepo) GetAll() ([]models.Item, error) {
 	}
 
 	return out, nil
+}
+
+func (i *ItemRepo) GetOne(item models.Item) (models.Item, error) {
+	var tmp models.Item
+
+	row := i.DB.Conn.QueryRow(context.Background(), GetOneQuery, *item.SKU)
+
+	if err := row.Scan(&tmp.SKU, &tmp.Name, &tmp.Type, &tmp.Cost); err != nil {
+		return models.Item{}, err
+	}
+
+	return tmp, nil
 }
 
 func (i *ItemRepo) Create(item models.Item) error {
