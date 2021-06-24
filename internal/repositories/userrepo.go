@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"context"
+
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	"github.com/Reywaltz/backend_xsolla/pkg/postgres"
 )
@@ -24,7 +26,7 @@ func NewItemRepository(db *postgres.DB) *ItemRepo {
 }
 
 func (i *ItemRepo) GetAll() ([]models.Item, error) {
-	rows, err := i.DB.Conn.Query(GetAllquery)
+	rows, err := i.DB.Conn.Query(context.Background(), GetAllquery)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +47,13 @@ func (i *ItemRepo) GetAll() ([]models.Item, error) {
 }
 
 func (i *ItemRepo) Create(item models.Item) error {
-	_, err := i.DB.Conn.Exec(InsertQuery, item.SKU, item.Name, item.Type, item.Cost)
+	_, err := i.DB.Conn.Exec(context.Background(),
+		InsertQuery,
+		item.SKU,
+		item.Name,
+		item.Type,
+		item.Cost,
+	)
 	if err != nil {
 		return err
 	}
@@ -54,7 +62,8 @@ func (i *ItemRepo) Create(item models.Item) error {
 }
 
 func (i *ItemRepo) Delete(item models.Item) (*string, error) {
-	row := i.DB.Conn.QueryRow(DeleteQuery, item.SKU)
+	row := i.DB.Conn.QueryRow(context.Background(),
+		DeleteQuery, item.SKU)
 
 	var sku *string
 

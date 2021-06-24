@@ -1,6 +1,10 @@
 package postgres
 
-import "github.com/jackc/pgx"
+import (
+	"context"
+
+	"github.com/jackc/pgx/v4"
+)
 
 const (
 	connstr = `postgres://xsolla_user:qwerty@localhost:5433/xsolla`
@@ -11,11 +15,7 @@ type DB struct {
 }
 
 func NewDB() (*DB, error) {
-	cfg, err := pgx.ParseConnectionString(connstr)
-	if err != nil {
-		return nil, err
-	}
-	conn, err := pgx.Connect(cfg)
+	conn, err := pgx.Connect(context.Background(), connstr)
 	if err != nil {
 		return nil, err
 	}

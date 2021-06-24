@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	log "github.com/Reywaltz/backend_xsolla/pkg/log"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4"
 )
 
 type ItemRepository interface {
@@ -59,7 +62,7 @@ func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpName, tmpType := *item.Name, *item.Type
-	sku := tmpName[:3] + `-` + tmpType[:3]
+	sku := strings.ToUpper(tmpName[:3] + `-` + tmpType[:3])
 
 	item.SKU = &sku
 
@@ -70,8 +73,8 @@ func (i *ItemHandlers) createItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rawJSON := []byte(`{"SKU": "` + *item.SKU + `"}`)
-	i.log.Infof("Created item: %v", item)
+	rawJSON := []byte(`{"sku": "` + *item.SKU + `"}`)
+	i.log.Infof("Created item: %s", item)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(rawJSON)
@@ -93,13 +96,20 @@ func (i *ItemHandlers) deleteItem(w http.ResponseWriter, r *http.Request) {
 
 	res, err := i.ItemRepo.Delete(item)
 	if err != nil {
-		i.log.Errorf("Can't delete item: %s", err)
-		w.WriteHeader(http.StatusBadRequest)
+		if errors.Is(err, pgx.ErrNoRows) {
+			i.log.Errorf("No such item: %s", err)
+			w.WriteHeader(http.StatusNotFound)
 
-		return
+			return
+		} else {
+			i.log.Fatalf("Can't delete item: %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+
+			return
+		}
 	}
 
-	i.log.Infof("Item with SKU=%s is deleted", *res)
+	i.log.Infof("Item with SKU={%s} is deleted", *res)
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -107,5 +117,5 @@ func (i *ItemHandlers) Routes(router *mux.Router) {
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 	subRouter.HandleFunc("/items", i.createItem).Methods("POST")
 	subRouter.HandleFunc("/items", i.getItems).Methods("GET")
-	subRouter.HandleFunc("/items/{sku}", i.deleteItem)
+	subRouter.HandleFunc("/items/{sku}", i.deleteItem).Methods("DELETE")
 }
