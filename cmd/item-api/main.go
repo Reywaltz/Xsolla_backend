@@ -35,5 +35,6 @@ func main() {
 	itemHandlers.Routes(router)
 	log.Infof("Inited router")
 
+	log.Infof("Server is up")
 	http.ListenAndServe(":8000", router)
 }
