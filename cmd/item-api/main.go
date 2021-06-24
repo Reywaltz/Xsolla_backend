@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Can't init db: %s", err)
 	}
-	log.Infof("db: %v", db)
+	log.Infof("Connected to db")
 
 	itemRepo := repositories.NewItemRepository(db)
 	log.Infof("Created ItemRepository")

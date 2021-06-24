@@ -4,12 +4,18 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 type Query struct {
 	Limit  *string
 	Offset *string
+	Type   string
 }
+
+const (
+	defaultType = `%%`
+)
 
 func HandleURLQueries(r *http.Request) (*Query, error) {
 	var queries Query
@@ -36,6 +42,13 @@ func HandleURLQueries(r *http.Request) (*Query, error) {
 		}
 
 		queries.Offset = &offset
+	}
+
+	filterType := strings.TrimSpace(query.Get("type"))
+	if filterType == "" {
+		queries.Type = defaultType
+	} else {
+		queries.Type = filterType
 	}
 
 	return &queries, nil
