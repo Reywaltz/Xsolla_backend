@@ -2,12 +2,10 @@ package postgres
 
 import (
 	"context"
+	"errors"
+	"os"
 
 	"github.com/jackc/pgx/v4"
-)
-
-const (
-	connstr = `postgres://xsolla_user:qwerty@localhost:5433/xsolla`
 )
 
 type DB struct {
@@ -15,7 +13,11 @@ type DB struct {
 }
 
 func NewDB() (*DB, error) {
-	conn, err := pgx.Connect(context.Background(), connstr)
+	connStr := os.Getenv("CONN_DB")
+	if connStr == "" {
+		return nil, errors.New("Connection string is not set")
+	}
+	conn, err := pgx.Connect(context.Background(), connStr)
 	if err != nil {
 		return nil, err
 	}
