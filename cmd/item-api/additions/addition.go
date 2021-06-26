@@ -3,24 +3,61 @@ package additions
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
 
 type Query struct {
-	Limit  *string
-	Offset *string
-	Type   string
+	Limit   *string
+	Offset  *string
+	Type    string
+	MinCost string
+	MaxCost string
 }
 
 const (
-	defaultType = `%%`
+	defaultType    = `%%`
+	defaultMinCost = `0`
+	defaultMaxCost = `4294967295`
 )
 
-func HandleURLQueries(r *http.Request) (*Query, error) {
-	var queries Query
+func (q *Query) HandleURLQueries(r *http.Request) error {
 	query := r.URL.Query()
+	limit, err := handleLimit(query)
+	if err != nil {
+		return err
+	}
+	q.Limit = limit
 
+	offset, err := handleOffset(query)
+	if err != nil {
+		return err
+	}
+	q.Offset = offset
+
+	itemType, err := handleType(query)
+	if err != nil {
+		return err
+	}
+	q.Type = itemType
+
+	minCost, err := handleMinCost(query)
+	if err != nil {
+		return err
+	}
+	q.MinCost = minCost
+
+	maxCost, err := handleMaxCost(query)
+	if err != nil {
+		return err
+	}
+	q.MaxCost = maxCost
+
+	return nil
+}
+
+func handleLimit(query url.Values) (*string, error) {
 	if limit := query.Get("limit"); limit != "" {
 		value, err := strconv.Atoi(limit)
 		if err != nil {
@@ -29,9 +66,14 @@ func HandleURLQueries(r *http.Request) (*Query, error) {
 		if value < 0 {
 			return nil, errors.New("Limit can't be negative")
 		}
-		queries.Limit = &limit
+
+		return &limit, nil
 	}
 
+	return nil, nil
+}
+
+func handleOffset(query url.Values) (*string, error) {
 	if offset := query.Get("offset"); offset != "" {
 		value, err := strconv.Atoi(offset)
 		if err != nil {
@@ -41,15 +83,49 @@ func HandleURLQueries(r *http.Request) (*Query, error) {
 			return nil, errors.New("Offset can't be negative")
 		}
 
-		queries.Offset = &offset
+		return &offset, nil
 	}
 
+	return nil, nil
+}
+
+func handleType(query url.Values) (string, error) {
 	filterType := strings.TrimSpace(query.Get("type"))
 	if filterType == "" {
-		queries.Type = defaultType
-	} else {
-		queries.Type = filterType
+		return defaultType, nil
 	}
 
-	return &queries, nil
+	return filterType, nil
+}
+
+func handleMinCost(query url.Values) (string, error) {
+	if min := query.Get("min"); min != "" {
+		value, err := strconv.Atoi(min)
+		if err != nil {
+			return min, err
+		}
+		if value < 0 {
+			return min, errors.New("Min cost can't be negative")
+		}
+
+		return min, nil
+	}
+
+	return defaultMinCost, nil
+}
+
+func handleMaxCost(query url.Values) (string, error) {
+	if max := query.Get("max"); max != "" {
+		value, err := strconv.Atoi(max)
+		if err != nil {
+			return max, err
+		}
+		if value < 0 {
+			return max, errors.New("Max cost can't be negative")
+		}
+
+		return max, nil
+	}
+
+	return defaultMaxCost, nil
 }

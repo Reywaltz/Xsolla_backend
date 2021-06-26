@@ -11,7 +11,8 @@ import (
 
 const (
 	itemFields  = `sku, name, type, cost`
-	GetAllquery = `SELECT ` + itemFields + ` from item where type ILIKE $1 || '%' limit $2 offset $3`
+	GetAllquery = `SELECT ` + itemFields + ` from item where type ILIKE $1 || '%' and 
+	cost > $2 and cost < $3 limit $4 offset $5`
 	GetOneQuery = `SELECT ` + itemFields + ` from item WHERE sku=$1`
 	InsertQuery = `INSERT INTO item ( ` + itemFields + `) 
 	VALUES ($1, $2, $3, $4) returning sku`
@@ -33,6 +34,8 @@ func (i *ItemRepo) GetAll(queries *additions.Query) ([]models.Item, error) {
 	rows, err := i.DB.Conn.Query(context.Background(),
 		GetAllquery,
 		queries.Type,
+		queries.MinCost,
+		queries.MaxCost,
 		queries.Limit,
 		queries.Offset)
 	if err != nil {

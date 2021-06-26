@@ -34,7 +34,8 @@ func NewItemHandlers(log log.Logger, itemRepo ItemRepository) *ItemHandlers {
 }
 
 func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
-	queries, err := additions.HandleURLQueries(r)
+	var queries additions.Query
+	err := queries.HandleURLQueries(r)
 	if err != nil {
 		i.log.Errorf("Wrong query param: %s", err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -42,7 +43,7 @@ func (i *ItemHandlers) getItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := i.ItemRepo.GetAll(queries)
+	res, err := i.ItemRepo.GetAll(&queries)
 	if err != nil {
 		i.log.Errorf("Can't get data from DB: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
