@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"strings"
 
-	numeric "github.com/jackc/pgtype/ext/shopspring-numeric"
+	"github.com/shopspring/decimal"
 )
 
 type Item struct {
-	SKU  *string         `json:"sku"`
-	Name *string         `json:"name"`
-	Type *string         `json:"type"`
-	Cost numeric.Numeric `json:"cost"`
+	SKU  string          `json:"sku"`
+	Name string          `json:"name"`
+	Type string          `json:"type"`
+	Cost decimal.Decimal `json:"cost"`
 }
 
 func (i *Item) Bind(r *http.Request) error {
@@ -27,19 +27,19 @@ func (i *Item) Bind(r *http.Request) error {
 		return err
 	}
 
-	if i.SKU != nil {
+	if i.SKU != "" {
 		return errors.New("SKU will be generated on create")
 	}
 
-	if i.Name == nil {
+	if i.Name == "" {
 		return errors.New("Name is required")
 	}
 
-	if i.Type == nil {
+	if i.Type == "" {
 		return errors.New("Type is required")
 	}
 
-	if len(strings.TrimSpace(*i.Name)) < 3 || len(strings.TrimSpace(*i.Type)) < 3 {
+	if len(strings.TrimSpace(i.Name)) < 3 || len(strings.TrimSpace(i.Type)) < 3 {
 		return errors.New("Name or type are too short")
 	}
 

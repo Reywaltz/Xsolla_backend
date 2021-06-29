@@ -17,9 +17,9 @@ type Query struct {
 }
 
 const (
-	defaultType    = `%%`
-	defaultMinCost = `0`
-	defaultMaxCost = `4294967295`
+	DefaultType    = `%%`
+	DefaultMinCost = `0`
+	DefaultMaxCost = `4294967295`
 )
 
 func (q *Query) HandleURLQueries(r *http.Request) error {
@@ -92,7 +92,7 @@ func handleOffset(query url.Values) (*string, error) {
 func handleType(query url.Values) (string, error) {
 	filterType := strings.TrimSpace(query.Get("type"))
 	if filterType == "" {
-		return defaultType, nil
+		return DefaultType, nil
 	}
 
 	return filterType, nil
@@ -111,7 +111,7 @@ func handleMinCost(query url.Values) (string, error) {
 		return min, nil
 	}
 
-	return defaultMinCost, nil
+	return DefaultMinCost, nil
 }
 
 func handleMaxCost(query url.Values) (string, error) {
@@ -127,5 +127,5 @@ func handleMaxCost(query url.Values) (string, error) {
 		return max, nil
 	}
 
-	return defaultMaxCost, nil
+	return DefaultMaxCost, nil
 }

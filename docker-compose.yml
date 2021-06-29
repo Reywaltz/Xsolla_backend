@@ -18,14 +18,14 @@ services:
       timeout: 5s
       retries: 5
 
-  xsolla_api:
-    build: .
-    environment:
-      DEV: "true"
-      CONN_DB: "postgres://xsolla_user:qwerty@db:5432/xsolla"
-    ports:
-      - "9000:9000"
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
+  # xsolla_api:
+  #   build: .
+  #   environment:
+  #     DEV: "true"
+  #     CONN_DB: "postgres://xsolla_user:qwerty@db:5432/xsolla"
+  #   ports:
+  #     - "9000:9000"
+  #   restart: always
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy

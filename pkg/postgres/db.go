@@ -8,11 +8,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-type DB struct {
-	Conn *pgx.Conn
-}
-
-func NewDB() (*DB, error) {
+func NewDB() (*pgx.Conn, error) {
 	connStr := os.Getenv("CONN_DB")
 	if connStr == "" {
 		return nil, errors.New("Connection string is not set")
@@ -22,5 +18,5 @@ func NewDB() (*DB, error) {
 		return nil, err
 	}
 
-	return &DB{Conn: conn}, nil
+	return conn, nil
 }
