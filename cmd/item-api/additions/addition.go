@@ -36,10 +36,8 @@ func (q *Query) HandleURLQueries(r *http.Request) error {
 	}
 	q.Offset = offset
 
-	itemType, err := handleType(query)
-	if err != nil {
-		return err
-	}
+	itemType := handleType(query)
+
 	q.Type = itemType
 
 	minCost, err := handleMinCost(query)
@@ -89,13 +87,13 @@ func handleOffset(query url.Values) (*string, error) {
 	return nil, nil
 }
 
-func handleType(query url.Values) (string, error) {
+func handleType(query url.Values) string {
 	filterType := strings.TrimSpace(query.Get("type"))
 	if filterType == "" {
-		return DefaultType, nil
+		return DefaultType
 	}
 
-	return filterType, nil
+	return filterType
 }
 
 func handleMinCost(query url.Values) (string, error) {
