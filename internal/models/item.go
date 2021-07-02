@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -43,11 +42,6 @@ func (i *Item) Bind(r *http.Request) error {
 	var tmp decimal.Decimal
 	if i.Cost == tmp {
 		return errors.New("Cost is required")
-	}
-
-	_, err = strconv.Atoi(i.Cost.String())
-	if err != nil {
-		return err
 	}
 
 	if i.Cost.IsNegative() {

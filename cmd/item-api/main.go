@@ -5,7 +5,7 @@ import (
 
 	"github.com/Reywaltz/backend_xsolla/cmd/item-api/handlers"
 	"github.com/Reywaltz/backend_xsolla/internal/repositories"
-	log "github.com/Reywaltz/backend_xsolla/pkg/log"
+	"github.com/Reywaltz/backend_xsolla/pkg/log"
 	"github.com/Reywaltz/backend_xsolla/pkg/postgres"
 	"github.com/gorilla/mux"
 )

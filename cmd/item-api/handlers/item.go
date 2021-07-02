@@ -10,6 +10,8 @@ import (
 	"github.com/Reywaltz/backend_xsolla/internal/models"
 	log "github.com/Reywaltz/backend_xsolla/pkg/log"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -115,6 +117,11 @@ func (i *ItemHandlers) CreateItem(w http.ResponseWriter, r *http.Request) {
 	item.SKU = strings.ToUpper(item.Name[:3] + `-` + item.Type[:3])
 
 	if err := i.ItemRepo.Create(item); err != nil {
+		if err.(*pgconn.PgError).Code == pgerrcode.UniqueViolation {
+			w.WriteHeader(http.StatusConflict)
+
+			return
+		}
 		i.log.Errorf("Can't insert item: %s", err)
 		w.WriteHeader(http.StatusInternalServerError)
 
