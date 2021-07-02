@@ -7,7 +7,7 @@ info:
     email: semenov.g.z@yandex.ru
   version: "1.0"
 servers:
-- url: http://localhost:8000/api/v1
+- url: http://vagu.space/api/v1
 paths:
   /items:
     get:
@@ -27,7 +27,7 @@ paths:
           type: string
       - name: min
         in: query
-        description: Минимальная стоймость товара
+        description: Минимальная стоимость товара
         required: false
         style: form
         explode: true
@@ -36,7 +36,7 @@ paths:
           type: integer
       - name: max
         in: query
-        description: Максимальная стоймость товара
+        description: Максимальная стоимость товара
         required: false
         style: form
         explode: true
@@ -70,10 +70,10 @@ paths:
                 type: array
                 example:
                 - sku: SON-SUB
-                  name: Sonmsq
-                  type: Sub
-                  cost: "9999"
-                - sku: POR-G-12
+                  name: Sonic rangers
+                  type: Game
+                  cost: "59.99"
+                - sku: POR-GAM
                   name: Portal
                   type: Game
                   cost: "12.23"
@@ -81,69 +81,16 @@ paths:
                   name: Sosnmsq
                   type: Sub
                   cost: "9999.12"
-                - sku: JUS-SUB
-                  name: Justice
-                  type: Sub
-                  cost: "33221"
-                - sku: JUS-GAM
-                  name: Justice
-                  type: Gam
-                  cost: "332.2"
-                - sku: JUX-GAM
-                  name: Juxstice
-                  type: Gam
-                  cost: "332.2"
-                - sku: JUX-SUB
-                  name: Juxstice
-                  type: Sub
-                  cost: "3322"
-                - sku: DOT-SUB
-                  name: Juxstice
-                  type: zxc
-                  cost: "3322"
-                - sku: COA-GAM
-                  name: Coaol Videogame
+                - sku: DMC-GAM
+                  name: DMC:Devil may cry
                   type: Game
-                  cost: "59.99"
+                  cost: "69.99"
+                - sku: HOT-GAM
+                  name: Hotline Miami
+                  type: Game
+                  cost: "49.99"
                 items:
                   $ref: '#/components/schemas/Getallitem'
-              example:
-              - sku: SON-SUB
-                name: Sonmsq
-                type: Sub
-                cost: "9999"
-              - sku: POR-G-12
-                name: Portal
-                type: Game
-                cost: "12.23"
-              - sku: SOS-SUB
-                name: Sosnmsq
-                type: Sub
-                cost: "9999.12"
-              - sku: JUS-SUB
-                name: Justice
-                type: Sub
-                cost: "33221"
-              - sku: JUS-GAM
-                name: Justice
-                type: Gam
-                cost: "332.2"
-              - sku: JUX-GAM
-                name: Juxstice
-                type: Gam
-                cost: "332.2"
-              - sku: JUX-SUB
-                name: Juxstice
-                type: Sub
-                cost: "3322"
-              - sku: DOT-SUB
-                name: Juxstice
-                type: zxc
-                cost: "3322"
-              - sku: COA-GAM
-                name: Coaol Videogame
-                type: Game
-                cost: "59.99"
       deprecated: false
     post:
       tags:
@@ -202,10 +149,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/Successfulresponse'
               example:
-                sku: SON-SUB
-                name: Sonmsq
-                type: Sub
-                cost: "9999"
+                sku: HOT-GAM
+                name: Hotline Miami
+                type: Game
+                cost: "49.99"
       deprecated: false
     put:
       tags:
@@ -279,10 +226,10 @@ components:
         cost:
           type: string
       example:
-        sku: SON-SUB
-        name: Sonmsq
-        type: Sub
-        cost: "9999"
+        sku: SON-GAM
+        name: Sonic
+        type: Game
+        cost: "45.99"
     Successfulresponse:
       title: Successfulresponse
       required:
@@ -301,10 +248,10 @@ components:
         cost:
           type: string
       example:
-        sku: SON-SUB
-        name: Sonmsq
-        type: Sub
-        cost: "9999"
+        sku: SON-GAM
+        name: Sonic
+        type: Game
+        cost: "45.99"
     AdditemRequest:
       title: AdditemRequest
       required:
