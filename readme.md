@@ -59,7 +59,7 @@ INSERT INTO item (SKU, name, type, cost) VALUES ('PLA-SUB', 'Playstation Plus', 
 ```
 
 ## Основные методы
-Документация по реализованному API представленна в виде swagger-файла: https://app.swaggerhub.com/apis/Reywaltz/xsolla-api/1.0
+Документация по реализованному API представленна в виде swagger-файла: https://app.swaggerhub.com/apis-docs/Reywaltz/xsolla-api/1.0
 
 ## Хостинг приложения
 Приложение развёрнуто на публичном хостинге reg.ru под следующим URL: https://vagu.space/api/v1/items
